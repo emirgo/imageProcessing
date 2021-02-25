@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 
 from skimage import exposure
 
-img = cv2.imread('sample.jpg', cv2.IMREAD_GRAYSCALE)
+img = cv2.imread('sample.png', cv2.IMREAD_GRAYSCALE)
 
 dst = cv2.calcHist(img, [0], None, [256], [0,256])
 
@@ -26,4 +26,4 @@ plt.ylabel('number of pixels')
 plt.title('Histogram with functions')
 plt.show()
 
-cv2.imwrite("resultFunctions.jpg", img_rescale)
+cv2.imwrite("resultFunctions.png", img_rescale)
