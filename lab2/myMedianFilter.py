@@ -11,7 +11,7 @@ img = io.imread('sample.png')
 
 data = np.array(img)
 
-filter_size = 10
+filter_size = 5
 
 temp = []
 indexer = filter_size // 2
