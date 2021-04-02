@@ -8,7 +8,7 @@ from skimage import io
 
 # read image
 img = io.imread('sample.png')
-median = cv2.medianBlur(img, 5)
+median = cv2.medianBlur(img, 3)
 compare = np.concatenate((img, median), axis=1)
 
 cv2.imshow('img', compare)
