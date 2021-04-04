@@ -1,6 +1,15 @@
 import cv2
 import numpy as np
 from sklearn import cluster
+import RPi.GPIO as GPIO
+import time
+
+SDI   = 11
+RCLK  = 13
+SRCLK = 15
+
+biggestDice = 0
+segCode = [0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x77,0x7c,0x39,0x5e,0x79,0x71,0x80]
 
 params = cv2.SimpleBlobDetector_Params()
 
@@ -9,6 +18,36 @@ params.minInertiaRatio = 0.6
 
 detector = cv2.SimpleBlobDetector_create(params)
 
+def print_msg():
+    print("Run")
+
+def setup():
+    GPIO.setmode(GPIO.BOARD)    #Number GPIOs by its physical location
+    GPIO.setup(SDI, GPIO.OUT)
+    GPIO.setup(RCLK, GPIO.OUT)
+    GPIO.setup(SRCLK, GPIO.OUT)
+    GPIO.output(SDI, GPIO.LOW)
+    GPIO.output(RCLK, GPIO.LOW)
+    GPIO.output(SRCLK, GPIO.LOW)
+
+def hc595_shift(dat):
+    for bit in range(0, 8): 
+        GPIO.output(SDI, 0x80 & (dat << bit))
+        GPIO.output(SRCLK, GPIO.HIGH)
+        time.sleep(0.001)
+        GPIO.output(SRCLK, GPIO.LOW)
+    GPIO.output(RCLK, GPIO.HIGH)
+    time.sleep(0.001)
+    GPIO.output(RCLK, GPIO.LOW)
+
+def loop():
+    while True:
+        for i in range(0, len(segCode)):
+            hc595_shift(segCode[i])
+            time.sleep(0.5)
+
+def destroy():   #When program ending, the function is executed. 
+    GPIO.cleanup()
 
 def get_blobs(frame):
     frame_blurred = cv2.medianBlur(frame, 7)
@@ -75,9 +114,12 @@ def overlay_info(frame, dice, blobs):
                     (int(d[1] - textsize[0] / 2),
                      int(d[2] + textsize[1] / 2)),
                     cv2.FONT_HERSHEY_PLAIN, 3, (0, 255, 0), 2)
-        print(biggestDice)
+        hc595_shift(segCode[biggestDice])
+        time.sleep(0.5)
 
 
+print_msg()
+setup()
 # Initialize a video feed
 cap = cv2.VideoCapture(0)
 
@@ -98,6 +140,8 @@ while(True):
     # Stop if the user presses "q"
     if res & 0xFF == ord('q'):
         break
+    
+
 
 # When everything is done, release the capture
 cap.release()
