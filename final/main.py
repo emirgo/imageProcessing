@@ -60,7 +60,7 @@ def overlay_info(frame, dice, blobs):
         r = b.size / 2
 
         cv2.circle(frame, (int(pos[0]), int(pos[1])),
-                   int(r), (255, 0, 0), 2)
+                   int(r), (0, 255, 242), 2)
 
     # Overlay dice number
     for d in dice:
@@ -74,7 +74,7 @@ def overlay_info(frame, dice, blobs):
         cv2.putText(frame, str(d[0]),
                     (int(d[1] - textsize[0] / 2),
                      int(d[2] + textsize[1] / 2)),
-                    cv2.FONT_HERSHEY_PLAIN, 3, (0, 255, 0), 2)
+                    cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 2)
         print(biggestDice)
 
 
