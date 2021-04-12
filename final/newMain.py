@@ -8,7 +8,7 @@ SDI   = 11
 RCLK  = 13
 SRCLK = 15
 
-biggestDice = 0
+biggestDiceVal = 0
 segCode = [0x3f,0x06,0x5b,0x4f,0x66,0x6d,0x7d,0x07,0x7f,0x6f,0x77,0x7c,0x39,0x5e,0x79,0x71,0x80]
 
 def hc595_shift(dat):
@@ -44,61 +44,61 @@ while(True):
 
     frameBlurred = cv2.medianBlur(frame, 7)
     frameGray = cv2.cvtColor(frameBlurred, cv2.COLOR_BGR2GRAY)
-    blobs = detector.detect(frameGray)
+    dots = detector.detect(frameGray)
 
     # Get dots
     X = []
-    for b in blobs:
+    for b in dots:
         pos = b.pt
 
         if pos != None:
             X.append(pos)
     X = np.asarray(X)
 
-    dice = []
+    diceVal = []
     if len(X) > 0:
         # cluster dots
         clustering = cluster.DBSCAN(eps=40, min_samples=0).fit(X)
 
-        numDice = max(clustering.labels_) + 1
+        numDiceVal = max(clustering.labels_) + 1
 
-        dice = []
+        diceVal = []
 
-        # centroid calculation for dice
-        for i in range(numDice):
-            Xdice = X[clustering.labels_ == i]
+        # centroid calculation for diceVal
+        for i in range(numDiceVal):
+            XdiceVal = X[clustering.labels_ == i]
 
-            centroidDice = np.mean(Xdice, axis=0)
+            centroidDiceVal = np.mean(XdiceVal, axis=0)
 
-            dice.append([len(Xdice), *centroidDice])
+            diceVal.append([len(XdiceVal), *centroidDiceVal])
     else:
-        dice = []
+        diceVal = []
     
-    biggestDice = 0
+    biggestDiceVal = 0
     # Dots
-    for b in blobs:
+    for b in dots:
         pos = b.pt
         r = b.size/2
 
         cv2.circle(frame, (int(pos[0]), int(pos[1])),
                    int(r), (0, 255, 242), 2)
 
-        # Overlay dice number
-        for d in dice:
+        # Overlay diceVal number
+        for d in diceVal:
             # Get textsize for text centering
             textsize = cv2.getTextSize(
                 str(d[0]), cv2.FONT_HERSHEY_PLAIN, 3, 2)[0]
             
-            if d[0] > biggestDice:
-                biggestDice = d[0]
+            if d[0] > biggestDiceVal:
+                biggestDiceVal = d[0]
 
             cv2.putText(frame, str(d[0]),
                         (int(d[1] - textsize[0] / 2),
                         int(d[2] + textsize[1] / 2)),
                         cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 2)
         # to be printed on seven segment
-        print(biggestDice)
-        hc595_shift(segCode[biggestDice])
+        print(biggestDiceVal)
+        hc595_shift(segCode[biggestDiceVal])
 
         cv2.imshow("frame", frame)
 
